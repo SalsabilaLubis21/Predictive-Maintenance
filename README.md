@@ -69,8 +69,9 @@ This boxplot shows the distribution and range of the four telemetry features (vo
 ![Class Imbalance Analysis](./images/class_imbalance.png)
 **Class Imbalance Analysis**
 
-- **Distribution**: Normal operations make up 99.91% (873,098 samples), while failures make up only 0.09% (743 samples).
-- **Strategy**: Accuracy is not a reliable metric for this highly imbalanced dataset. Therefore, the strategy focuses on techniques that handle imbalance effectively: using class weighting (`scale_pos_weight`), tuning the decision threshold to optimize F1-Score, and evaluating performance with metrics like PR-AUC, Recall, and F1-Score.
+Distribution: Normal operations make up 99.91% (873,098 samples), while failures make up only 0.09% (743 samples).
+
+Strategy: Accuracy is not a reliable metric for this highly imbalanced dataset. Therefore, the strategy focuses on techniques that handle imbalance effectively: using class weighting (scale_pos_weight), tuning the decision threshold to optimize F1-Score, and evaluating performance with metrics like PR-AUC, Recall, and F1-Score.
 
 - **Baseline Models**:
   - **Naive Baseline (DummyClassifier)**: Uses the most common class as a simple baseline to set a minimum performance level.
@@ -110,7 +111,7 @@ This boxplot shows the distribution and range of the four telemetry features (vo
 
 Early Warning Analysis: Evaluating early warning utility by measuring lead time prior to actual failure events.
 
-![Early Warning Analysis](./early_warning_analysis.png)
+![Early Warning Analysis](./images/early_warning_analysis.png)
 **Early Warning Analysis**
 
 - **Warning Time**: The system gives its first warning an average of 22.61 hours before a failure. The median is 23 hours, with a range of 19–23 hours.
@@ -123,8 +124,10 @@ Key Findings
 
 - **Top Feature**: The number of errors in the last 24 hours, especially `errorID_error3_count_24h`, has the biggest impact on the model's predictions, with an importance score above 0.25.
 - **Other Important Features**: Average sensor values over the last 24 hours, especially `vibration_mean_24h` and `volt_mean_24h`, also play an important role.
-- **Takeaway**: Recent errors and sensor changes over the last 24 hours give stronger warning signals than using a longer 72-hour period.
 
+### Summary of Results
+
+- **Takeaway**: Recent errors and sensor changes over the last 24 hours give stronger warning signals than using a longer 72-hour period.
 - **Data Characteristics**: High class imbalance in failure events requiring specialized loss handling (`scale_pos_weight`, threshold tuning).
 - **Baseline Progression**: Logistic Regression significantly outperforms the Naive baseline, proving linear signals exist in raw telemetry.
 - **Advanced XGBoost EWS**: XGBoost paired with full feature engineering demonstrates superior performance across all critical metrics (PR-AUC, F1-Score for the Failure class).
