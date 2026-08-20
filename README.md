@@ -126,8 +126,8 @@ Early Warning Analysis: Evaluating early warning utility by measuring lead time 
 
 ### Summary of Results
 
-- **Takeaway**: Recent errors and sensor changes over the last 24 hours give stronger warning signals than using a longer 72-hour period.
-- **Data Characteristics**: High class imbalance in failure events requiring specialized loss handling (`scale_pos_weight`, threshold tuning).
-- **Baseline Progression**: Logistic Regression significantly outperforms the Naive baseline, proving linear signals exist in raw telemetry.
-- **Advanced XGBoost EWS**: XGBoost paired with full feature engineering demonstrates superior performance across all critical metrics (PR-AUC, F1-Score for the Failure class).
-- **Pipeline Validity**: Data leakage checks confirm model robustness, providing reliable lead times for operational early warnings.
+- **Recent Signals**: Errors and sensor changes in the last 24 hours provide stronger warning signals than using a longer 72-hour period.
+- **Data Characteristics**: The dataset has a strong class imbalance, so methods such as scale_pos_weight and threshold tuning are needed.
+- **Baseline Results**: Logistic Regression performs much better than the Naive Baseline, showing that the sensor data contains useful patterns for predicting failures.
+- **XGBoost Performance**: XGBoost with the engineered features gives the best overall performance, especially in PR-AUC and F1-Score for the failure class.
+- **Pipeline Check**: Data leakage checks show that the model is reliable and can provide useful early warnings before machine failures.
