@@ -74,31 +74,19 @@ This boxplot shows the distribution and range of the four telemetry features (vo
 - **Distribution**: Normal operations make up 99.91% (873,098 samples), while failures make up only 0.09% (743 samples).
 - **Strategy**: Accuracy is not reliable for this dataset because failures are very rare. Therefore, class weighting (scale_pos_weight) and metrics such as PR-AUC, Recall, and F1-Score are used to better evaluate the model's ability to detect failures.
 
-Preprocessing: Basic feature engineering to create 24-hour rolling mean and standard deviation for telemetry data, along with encoding machine models.
-
-Baseline Models:
-
-Naive Baseline (DummyClassifier): Established using a simple strategy (most frequent class) to set a minimum benchmark.
-
-Logistic Regression Baseline: Trained on basic features with class weighting (class_weight='balanced') to handle class imbalance.
-
-Advanced Feature Engineering: Comprehensive feature engineering applied to capture temporal dynamics:
-
-Rolling 24-hour mean, standard deviation, min, and max for telemetry features.
-
-Rate of change (diff) for telemetry features.
-
-Rolling 24-hour and 72-hour counts for different error types.
-
-Hours elapsed since last maintenance for each component.
-
-Machine metadata (model and age).
-
-Target Labeling & Time-Based Data Split: A forward-looking target variable (target) is created to predict failures within a t+1 to t+24 hour window. Data is split chronologically into Train (70%), Validation (15%), and Test (15%) sets to prevent temporal data leakage and simulate real-world deployment.
-
-XGBoost Model Training: An XGBoost classifier trained on the full feature set, addressing class imbalance using scale_pos_weight.
-
-Threshold Tuning: Optimal decision threshold for XGBoost is determined using the validation set to maximize F1-score.
+- **Preprocessing**: Basic feature engineering to create 24-hour rolling mean and standard deviation for telemetry data, along with encoding machine models.
+- **Baseline Models**:
+  - **Naive Baseline (DummyClassifier)**: Established using a simple strategy (most frequent class) to set a minimum benchmark.
+  - **Logistic Regression Baseline**: Trained on basic features with class weighting (`class_weight='balanced'`) to handle class imbalance.
+- **Advanced Feature Engineering**: Comprehensive feature engineering applied to capture temporal dynamics:
+  - Rolling 24-hour mean, standard deviation, min, and max for telemetry features.
+  - Rate of change (diff) for telemetry features.
+  - Rolling 24-hour and 72-hour counts for different error types.
+  - Hours elapsed since last maintenance for each component.
+  - Machine metadata (model and age).
+- **Target Labeling & Time-Based Data Split**: A forward-looking target variable (`target`) is created to predict failures within a t+1 to t+24 hour window. Data is split chronologically into Train (70%), Validation (15%), and Test (15%) sets to prevent temporal data leakage and simulate real-world deployment.
+- **XGBoost Model Training**: An XGBoost classifier trained on the full feature set, addressing class imbalance using `scale_pos_weight`.
+- **Threshold Tuning**: Optimal decision threshold for XGBoost is determined using the validation set to maximize F1-score.
 
 Model Comparison: All three models (Naive, Logistic Regression, XGBoost) are evaluated on the held-out test set using Accuracy, Precision, Recall, F1-Score, PR-AUC, and ROC-AUC. A comparative summary table and Precision-Recall curves are generated.
 
@@ -110,19 +98,11 @@ Model Comparison: All three models (Naive, Logistic Regression, XGBoost) are eva
 - **Logistic Regression**: Detects most failures with a high Recall of 95.97%, but produces many false alarms. Its Precision is only 15.81%, resulting in a low F1-Score of 0.2714.
 - **XGBoost**: Gives the best overall results. It detects 96.41% of failures (Recall) while keeping false alarms low with 96.99% Precision. It also achieves an excellent PR-AUC of 0.9962, showing strong performance on the imbalanced dataset.
 
-Data Leakage & Robustness Checks: Rigorous checks performed to ensure validity:
-
 **Data Leakage Verification**
 
 - **Ablation Test**: Removing all 10 `errorID_*` features reduces the PR-AUC from 0.9962 to 0.9012. The model still performs well using only sensor data, showing that it does not depend only on error logs.
 - **Event-Level Detection**: The model detects 100% of failure events (158/158). This means all recorded failure events were detected, while the row-level recall is 0.9600.
 - **Correlation Check**: The highest correlation with the target is 0.3366 (`errorID_error5_count_24h`), which is relatively low. This suggests there is no strong direct correlation that would indicate obvious data leakage.
-
-Ablation Test: Assessing the explicit impact of errorID\_\* features on predictive power.
-
-Event-Level Detection Rate: Verifying if row-level recall accurately reflects failure detection at the event level.
-
-Correlation Analysis: Checking for collinearity or near-perfect correlations between individual features and the target.
 
 Early Warning Analysis: Evaluating early warning utility by measuring lead time prior to actual failure events.
 
@@ -141,10 +121,7 @@ Key Findings
 - **Other Important Features**: Average sensor values over the last 24 hours, especially `vibration_mean_24h` and `volt_mean_24h`, also play an important role.
 - **Takeaway**: Recent errors and sensor changes over the last 24 hours give stronger warning signals than using a longer 72-hour period.
 
-Data Characteristics: High class imbalance in failure events requiring specialized loss handling (scale_pos_weight, threshold tuning).
-
-Baseline Progression: Logistic Regression significantly outperforms the Naive baseline, proving linear signals exist in raw telemetry.
-
-Advanced XGBoost EWS: XGBoost paired with full feature engineering demonstrates superior performance across all critical metrics (PR-AUC, F1-Score for the Failure class).
-
-Pipeline Validity: Data leakage checks confirm model robustness, providing reliable lead times for operational early warnings.
+- **Data Characteristics**: High class imbalance in failure events requiring specialized loss handling (`scale_pos_weight`, threshold tuning).
+- **Baseline Progression**: Logistic Regression significantly outperforms the Naive baseline, proving linear signals exist in raw telemetry.
+- **Advanced XGBoost EWS**: XGBoost paired with full feature engineering demonstrates superior performance across all critical metrics (PR-AUC, F1-Score for the Failure class).
+- **Pipeline Validity**: Data leakage checks confirm model robustness, providing reliable lead times for operational early warnings.
