@@ -18,6 +18,7 @@ The primary technologies and libraries used in this notebook are:
 - **Seaborn**: For statistical data visualization and exploring relationships between variables.
 
 Data Sources
+Source: [Microsoft Azure Predictive Maintenance](https://www.kaggle.com/datasets/arnabbiswas1/microsoft-azure-predictive-maintenance)
 
 ![Telemetry Data](./images/telemetry_data.png)
 This image displays the first 5 rows of the Telemetry Dataset (telemetry_df), which records the operational health of machines at 1-hour intervals.
@@ -31,20 +32,17 @@ This image displays the first 5 rows of the Telemetry Dataset (telemetry_df), wh
 
 The analysis utilizes several datasets:
 
-telemetry_df: Machine telemetry data (voltage, rotation, pressure, vibration) recorded hourly.
+- **telemetry_df**: Machine telemetry data (voltage, rotation, pressure, vibration) recorded hourly.
+- **errors_df**: Error logs recorded by machines over time.
+- **maint_df**: Maintenance records detailing component replacements.
+- **machines_df**: Machine metadata, including model type and age.
+- **failures_df**: Records of historical machine failure events.
 
-errors_df: Error logs recorded by machines over time.
+### Methodology
 
-maint_df: Maintenance records detailing component replacements.
-
-machines_df: Machine metadata, including model type and age.
-
-failures_df: Records of historical machine failure events.
-
-Methodology
 The notebook follows a structured end-to-end pipeline:
 
-Data Loading & Initial Exploration: Loading all datasets and performing initial checks (missing values, duplicates, data types, descriptive statistics, outlier detection, and frequency analysis).
+- **Data Loading & Initial Exploration**: Loading all datasets and performing initial checks (missing values, duplicates, data types, descriptive statistics, outlier detection, and frequency analysis).
 
 ![Telemetry Sensor Boxplot Analysis](./images/telementry_sensor_outlier.png)
 **Telemetry Sensor Boxplot Analysis**
@@ -72,23 +70,29 @@ This boxplot shows the distribution and range of the four telemetry features (vo
 **Class Imbalance Analysis**
 
 - **Distribution**: Normal operations make up 99.91% (873,098 samples), while failures make up only 0.09% (743 samples).
-- **Strategy**: Accuracy is not reliable for this dataset because failures are very rare. Therefore, class weighting (scale_pos_weight) and metrics such as PR-AUC, Recall, and F1-Score are used to better evaluate the model's ability to detect failures.
+- **Strategy**: Accuracy is not a reliable metric for this highly imbalanced dataset. Therefore, the strategy focuses on techniques that handle imbalance effectively: using class weighting (`scale_pos_weight`), tuning the decision threshold to optimize F1-Score, and evaluating performance with metrics like PR-AUC, Recall, and F1-Score.
 
-- **Preprocessing**: Basic feature engineering to create 24-hour rolling mean and standard deviation for telemetry data, along with encoding machine models.
 - **Baseline Models**:
-  - **Naive Baseline (DummyClassifier)**: Established using a simple strategy (most frequent class) to set a minimum benchmark.
-  - **Logistic Regression Baseline**: Trained on basic features with class weighting (`class_weight='balanced'`) to handle class imbalance.
-- **Advanced Feature Engineering**: Comprehensive feature engineering applied to capture temporal dynamics:
-  - Rolling 24-hour mean, standard deviation, min, and max for telemetry features.
-  - Rate of change (diff) for telemetry features.
-  - Rolling 24-hour and 72-hour counts for different error types.
-  - Hours elapsed since last maintenance for each component.
-  - Machine metadata (model and age).
-- **Target Labeling & Time-Based Data Split**: A forward-looking target variable (`target`) is created to predict failures within a t+1 to t+24 hour window. Data is split chronologically into Train (70%), Validation (15%), and Test (15%) sets to prevent temporal data leakage and simulate real-world deployment.
-- **XGBoost Model Training**: An XGBoost classifier trained on the full feature set, addressing class imbalance using `scale_pos_weight`.
-- **Threshold Tuning**: Optimal decision threshold for XGBoost is determined using the validation set to maximize F1-score.
-
-Model Comparison: All three models (Naive, Logistic Regression, XGBoost) are evaluated on the held-out test set using Accuracy, Precision, Recall, F1-Score, PR-AUC, and ROC-AUC. A comparative summary table and Precision-Recall curves are generated.
+  - **Naive Baseline (DummyClassifier)**: Uses the most common class as a simple baseline to set a minimum performance level.
+  - **Logistic Regression**: Uses basic features and `class_weight='balanced'` to help handle the imbalance between normal and failure cases.
+- **Feature Engineering**:
+  Additional features are created to capture recent changes in machine conditions:
+  - 24-hour rolling statistics: Mean, standard deviation, minimum, and maximum of sensor values.
+  - Rate of Change: Measures how quickly sensor values change.
+  - Error Counts: Counts different error types over the last 24 and 72 hours.
+  - Time Since Maintenance: Measures the number of hours since the last maintenance for each component.
+  - Machine Information: Includes the machine model and age.
+- **Target Labeling & Data Split**:
+  The target is created to predict whether a machine will fail within the next 1–24 hours. The data is split based on time:
+  - 70% Training
+  - 15% Validation
+  - 15% Testing
+    This prevents using future data to predict the past and better represents real-world use.
+- **XGBoost Model**:
+  XGBoost is trained using all engineered features. The `scale_pos_weight` parameter is used to handle the large difference between normal and failure cases.
+- **Threshold Tuning**:
+  The XGBoost prediction threshold is adjusted using the validation data to find the threshold that gives the best F1-Score.
+- **Model Comparison**: The three models (Naive, Logistic Regression, XGBoost) are evaluated on the held-out test set using Accuracy, Precision, Recall, F1-Score, PR-AUC, and ROC-AUC. A comparative summary table and Precision-Recall curves are generated.
 
 ![Model Comparison](./images/model_comparison.png)
 ![Model Comparison Curve](./images/model_comparison_curve.png)
