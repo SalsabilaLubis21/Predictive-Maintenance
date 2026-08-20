@@ -103,6 +103,12 @@ Strategy: Accuracy is not a reliable metric for this highly imbalanced dataset. 
 - **Logistic Regression**: Detects most failures with a high Recall of 95.97%, but produces many false alarms. Its Precision is only 15.81%, resulting in a low F1-Score of 0.2714.
 - **XGBoost**: Gives the best overall results. It detects 96.41% of failures (Recall) while keeping false alarms low with 96.99% Precision. It also achieves an excellent PR-AUC of 0.9962, showing strong performance on the imbalanced dataset.
 
+![Feature Importance Analysis](./images/feature_importance.png)
+**Feature Importance Analysis**
+
+- **Top Feature**: The number of errors in the last 24 hours, especially `errorID_error3_count_24h`, has the biggest impact on the model's predictions, with an importance score above 0.25.
+- **Other Important Features**: Average sensor values over the last 24 hours, especially `vibration_mean_24h` and `volt_mean_24h`, also play an important role.
+
 **Data Leakage Verification**
 
 - **Ablation Test**: Removing all 10 `errorID_*` features reduces the PR-AUC from 0.9962 to 0.9012. The model still performs well using only sensor data, showing that it does not depend only on error logs.
@@ -117,13 +123,6 @@ Early Warning Analysis: Evaluating early warning utility by measuring lead time 
 - **Warning Time**: The system gives its first warning an average of 22.61 hours before a failure. The median is 23 hours, with a range of 19–23 hours.
 - **Early Detection Rate**: 99.4% of failure events (157 out of 158) trigger a warning at least 20 hours before failure. All 158 failure events are detected.
 - **Operational Impact**: Around 23 hours of warning time gives the maintenance team enough time to inspect the machine and perform preventive maintenance before a failure occurs.
-
-Key Findings
-![Feature Importance Analysis](./images/feature_importance.png)
-**Feature Importance Analysis**
-
-- **Top Feature**: The number of errors in the last 24 hours, especially `errorID_error3_count_24h`, has the biggest impact on the model's predictions, with an importance score above 0.25.
-- **Other Important Features**: Average sensor values over the last 24 hours, especially `vibration_mean_24h` and `volt_mean_24h`, also play an important role.
 
 ### Summary of Results
 
